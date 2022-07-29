@@ -1,29 +1,49 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useReducer } from 'react'
 import { useParams } from 'react-router-dom'
 import { apiGet } from '../misc/config';
+
+const reducer = (prevState, action) => { 
+  // because every action has type key , hence we can use switch function
+  switch(action.type){
+
+    case 'FETCH_SUCCESS':{
+      // ...prevState -> it will merge the prev state and whatever we specify after that will be overriden
+      // we update isLoading state and show the action
+      return {isLoading: false, error:null, show: action.show}
+    }
+    case 'FETCH_FAILED':{
+      return {...prevState, isLoading: false, error:action.error}
+    }
+    default : return prevState
+  }
+}
+
+const initialState = {
+  show : null,
+  isLoading: true,
+  error : true
+}
+
 
 const Show = () => {
   // custom hooks used to access the id of shows
 
   const { id } = useParams();
-  const[show,setShow] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [{show, isLoading, error},dispatch] = useReducer(reducer,initialState);
 
+  
   useEffect( ()=>{
 
     let isMounted = true;
     apiGet(`/shows/${id}?embed[]=seasons&embed[]=cast`)
       .then(results => {
         if(isMounted){
-          setShow(results);
-          setIsLoading(false);
+          dispatch({ type: 'FETCH_SUCCESS', show: results})
         }
     })
     .catch(err => {
       if(isMounted){
-        setError(err.message);
-        setIsLoading(false);
+        dispatch({ type: 'FETCH_FAILED', error: err.message})
       }
     })
 
@@ -35,6 +55,7 @@ const Show = () => {
   // callback function runs only when something inside array changes
 
   console.log('show',show);
+  console.log('isLoading',isLoading);
 
   if(isLoading){
     return <div>Data is being loaded</div>
