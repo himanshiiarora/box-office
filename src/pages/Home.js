@@ -13,6 +13,7 @@ const Home = () => {
 
   const isShowsSearch = searchOption === 'shows';
 
+
   const onInputChange = (ev) => {
     setInput(ev.target.value);
    // console.log(ev.target.value); // to print whatever we type in input bar

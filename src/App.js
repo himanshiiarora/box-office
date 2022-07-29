@@ -2,6 +2,7 @@ import React from 'react';
 import { Switch , Route } from 'react-router-dom' // imported switch and route
 // import Navs from './components/Navs';
 import Home from './pages/Home';
+import Show from './pages/Show';
 import { Starred } from './pages/Starred';
 
 function App() {
@@ -23,6 +24,11 @@ function App() {
       <Route exact path="/starred"> 
         <Starred/>
       </Route> {/* The page is starred page. Route tag means creating a new page. */}
+
+      <Route exact path="/show/:id" >
+        <Show />
+      </Route>
+
       <Route> 
       <div> This page doesn't exist. </div>
       </Route> {/* The page is 404 error page,displays when there are un-recognized / undefined pages rendered. */}
