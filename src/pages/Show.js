@@ -1,69 +1,90 @@
-import React, { useEffect, useReducer } from 'react'
-import { useParams } from 'react-router-dom'
-import { apiGet } from '../misc/config';
+import React, { useEffect, useReducer } from "react";
+import { useParams } from "react-router-dom";
+import Cast from "../components/show/Cast";
+import Details from "../components/show/Details";
+import Seasons from "../components/show/Seasons";
+import ShowMainData from "../components/show/ShowMainData";
+import { apiGet } from "../misc/config";
 
-const reducer = (prevState, action) => { 
+const reducer = (prevState, action) => {
   // because every action has type key , hence we can use switch function
-  switch(action.type){
-
-    case 'FETCH_SUCCESS':{
+  switch (action.type) {
+    case "FETCH_SUCCESS": {
       // ...prevState -> it will merge the prev state and whatever we specify after that will be overriden
       // we update isLoading state and show the action
-      return {isLoading: false, error:null, show: action.show}
+      return { isLoading: false, error: null, show: action.show };
     }
-    case 'FETCH_FAILED':{
-      return {...prevState, isLoading: false, error:action.error}
+    case "FETCH_FAILED": {
+      return { ...prevState, isLoading: false, error: action.error };
     }
-    default : return prevState
+    default:
+      return prevState;
   }
-}
+};
 
 const initialState = {
-  show : null,
+  show: null,
   isLoading: true,
-  error : true
-}
-
+  error: true,
+};
 
 const Show = () => {
   // custom hooks used to access the id of shows
 
   const { id } = useParams();
-  const [{show, isLoading, error},dispatch] = useReducer(reducer,initialState);
+  const [{ show, isLoading, error }, dispatch] = useReducer(
+    reducer,
+    initialState
+  );
 
-  
-  useEffect( ()=>{
-
+  useEffect(() => {
     let isMounted = true;
     apiGet(`/shows/${id}?embed[]=seasons&embed[]=cast`)
-      .then(results => {
-        if(isMounted){
-          dispatch({ type: 'FETCH_SUCCESS', show: results})
+      .then((results) => {
+        if (isMounted) {
+          dispatch({ type: "FETCH_SUCCESS", show: results });
         }
-    })
-    .catch(err => {
-      if(isMounted){
-        dispatch({ type: 'FETCH_FAILED', error: err.message})
-      }
-    })
+      })
+      .catch((err) => {
+        if (isMounted) {
+          dispatch({ type: "FETCH_FAILED", error: err.message });
+        }
+      });
 
     return () => {
       isMounted = false;
-    }
-  }, [id] ) 
+    };
+  }, [id]);
   //it expects two inputs 1. callback function, 2. array of dependencies
   // callback function runs only when something inside array changes
 
-  console.log('show',show);
-  console.log('isLoading',isLoading);
+  console.log("show", show);
+  console.log("isLoading", isLoading);
 
-  if(isLoading){
-    return <div>Data is being loaded</div>
+  if (isLoading) {
+    return <div>Data is being loaded</div>;
   }
-  if(error){
-    return <div > {error} Error Occured</div>
+  if (error) {
+    return <div> {error} Error Occured</div>;
   }
-  return <div>This is a show page</div>
-}
+  return (
+    <div>
+      <ShowMainData image={show.image} name={show.name} rating={show.rating} summary={show.summary} tags={show.genres} />
 
-export default Show
+      <div>
+        <h2>Details</h2>
+        <Details status={show.status} network={show.network} premiered={show.premiered} />
+      </div>
+      <div>
+        <h2>Seasons</h2>
+        <Seasons seasons={show._embedded.seasons} />
+      </div>
+      <div>
+        <h2>Cast</h2>
+        <Cast cast={show._embedded.cast} />
+      </div>
+    </div>
+  );
+};
+
+export default Show;
